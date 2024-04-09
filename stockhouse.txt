@@ -1,0 +1,67 @@
+#define BLYNK_TEMPLATE_ID "TMPL3Z48rVqrb"
+#define BLYNK_TEMPLATE_NAME "STOCK MANAGEMENT"
+#define BLYNK_AUTH_TOKEN "y-W8wzf0XOOb7y9Rilr-CScm8TJSFc6q"
+
+
+#define BLYNK_PRINT Serial
+
+#include <ESP8266WiFi.h>
+#include <BlynkSimpleEsp8266.h>
+
+
+
+#define RAIN_SENSOR_PIN A0
+#define RAIN_SENSOR_THRESHOLD 900 // adjust this value based on your sensor
+
+char ssid[] = "PRASAD";
+char pass[] = "123456789";
+BlynkTimer timer;
+ 
+int mq135 = D0; // smoke sensor is connected with the analog pin A0 
+int data = 0; 
+
+
+void setup()
+{
+  
+  Serial.begin(115200);
+  Blynk.begin(BLYNK_AUTH_TOKEN, ssid, pass);
+  Serial.begin(115200);
+  Blynk.begin(BLYNK_AUTH_TOKEN, ssid, pass);
+  timer.setInterval(1000L, getSendData); // new data will be updated every 1 sec 
+}
+void getSendData()
+{
+  data = analogRead(mq135); 
+  Blynk.virtualWrite(V0, data); //
+ 
+  if (data > 50)
+  {
+    Blynk.logEvent("SMOKE"); 
+  }
+}
+
+void loop() 
+{
+  int sensorValue = analogRead(RAIN_SENSOR_PIN);
+  Serial.print("Rain sensor value: ");
+  Serial.println(sensorValue);
+
+  if (sensorValue < RAIN_SENSOR_THRESHOLD) {
+    Blynk.logEvent("RAINWATER");
+    
+  }
+
+  Blynk.virtualWrite(V1, sensorValue);
+
+  Blynk.run();
+  delay(1000);
+  timer.run(); // Initiates SimpleTimer
+  Blynk.run();
+}
+
+
+ 
+/*****************
+ * Send Sensor data to Blynk
+ ******************/
